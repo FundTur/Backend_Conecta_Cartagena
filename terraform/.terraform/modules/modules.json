@@ -1,0 +1,1 @@
+{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"ansible","Source":"./modules/ansible","Dir":"modules/ansible"},{"Key":"ec2_instance","Source":"./modules/ec2_instance","Dir":"modules/ec2_instance"},{"Key":"vpc","Source":"./modules/vpc","Dir":"modules/vpc"}]}

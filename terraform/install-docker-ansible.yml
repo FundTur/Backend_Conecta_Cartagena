@@ -1,0 +1,52 @@
+---
+- name: Install Docker and Directus on Amazon Linux
+  hosts: ec2_instances
+  become: true
+
+  tasks:
+    - name: Ensure the system is up to date
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Install Docker
+      shell: |
+        sudo yum install -y docker
+        sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose 
+
+    - name: Start Docker daemon
+      shell: |
+        sudo service docker start
+
+    - name: Verify Docker is running
+      shell: |
+        sudo service docker status
+
+    - name: Verify Docker installation
+      shell: |
+        docker --version
+        docker-compose --version
+
+    - name: Copy Directus files (without nested directory)
+      ansible.builtin.copy:
+        src: ../directus/
+        dest: /home/ec2-user/directus/
+        mode: '0755'
+        # This ensures files inside `directus` are copied, not the folder itself
+        remote_src: no
+
+    - name: Check if docker-compose.yml exists
+      stat:
+        path: /home/ec2-user/directus/docker-compose.yml
+      register: compose_file
+
+    - name: Fail if docker-compose.yml is missing
+      fail:
+        msg: "docker-compose.yml is missing. Ensure the file is present in the /home/ec2-user/directus directory."
+      when: not compose_file.stat.exists
+
+    - name: Run Directus
+      shell: |
+        cd /home/ec2-user/directus
+        docker-compose up -d

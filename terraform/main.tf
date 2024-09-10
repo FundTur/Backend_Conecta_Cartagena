@@ -8,7 +8,6 @@ resource "aws_security_group" "ec2_security_group" {
   vpc_id      = aws_default_vpc.default_vpc.id
 
   ingress {
-
     description = "http access"
     from_port   = 80
     to_port     = 80
@@ -45,22 +44,11 @@ resource "aws_security_group" "ec2_security_group" {
 }
 
 # create default subnet if one does not exit
-
 resource "aws_default_subnet" "default_az1" {
   availability_zone = data.aws_availability_zones.available_zones.names[0]
 
   tags = {
     Name = "default subnet"
-  }
-}
-
-# create default subnet in another availability zone
-resource "aws_default_subnet" "default_az2" {
-
-  availability_zone = data.aws_availability_zones.available_zones.names[1]
-
-  tags = {
-    Name = "default subnet AZ2"
   }
 }
 
@@ -88,7 +76,6 @@ data "aws_ami" "amazon_linux_2" {
 }
 
 resource "tls_private_key" "rsa_key" {
-
   algorithm = "RSA"
   rsa_bits  = 4096
 }
@@ -113,13 +100,11 @@ resource "local_file" "ssh_key" {
 
 # # Create PostgreSQL Database in RDS
 # resource "aws_db_instance" "directus_db" {
-
 #   allocated_storage    = 20
 #   engine               = "postgres"
 #   engine_version       = "13.4"
 #   instance_class       = "db.t2.micro"
 #   username             = "directus"
-
 #   password             = "directuspassword"
 #   parameter_group_name = "default.postgres13"
 #   publicly_accessible  = true
@@ -138,17 +123,13 @@ resource "local_file" "ssh_key" {
 
 #   tags = {
 #     Name = "directus-rds"
-
 #   }
-
 # }
 
-
 # # Create a Subnet Group for RDS
-# # Update the DB Subnet Group to include both subnets
 # resource "aws_db_subnet_group" "default" {
 #   name       = "directus-db-subnet-group"
-#   subnet_ids = [aws_default_subnet.default_az1.id, aws_default_subnet.default_az2.id]
+#   subnet_ids = [aws_default_subnet.default_az1.id]
 
 #   tags = {
 #     Name = "directus-db-subnet-group"
@@ -164,13 +145,11 @@ resource "aws_instance" "ec2_instance" {
   vpc_security_group_ids = [aws_security_group.ec2_security_group.id]
   key_name               = aws_key_pair.key_pair.key_name
 
-
   tags = {
     Name = "Directus Docker server"
   }
 
   root_block_device {
-
     volume_size = 30
     volume_type = "gp2"
   }
@@ -195,10 +174,8 @@ data "template_file" "inventory" {
     EOT
 }
 
-
 resource "local_file" "dynamic_inventory" {
   depends_on = [aws_instance.ec2_instance]
-
 
   filename = "dynamic_inventory.ini"
   content  = data.template_file.inventory.rendered
